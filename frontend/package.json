@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-popover": "^1.1.17",
+    "@radix-ui/react-toggle-group": "^1.1.13",
     "@stellar/freighter-api": "^4.1.0",
     "@stellar/stellar-sdk": "^13.3.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "date-fns": "^4.4.0",
     "lucide-react": "^1.22.0",
     "react": "^19.0.0",
+    "react-day-picker": "^10.0.1",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.1",
     "vite": "^6.0.7"
