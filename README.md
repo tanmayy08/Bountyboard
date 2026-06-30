@@ -171,8 +171,7 @@ Current test coverage includes:
 
 ## Demo Video
 
-
-
+[ demo](https://streamable.com/keing4)
 ## Tech Stack
 
 - Smart contracts: Rust + Soroban SDK
