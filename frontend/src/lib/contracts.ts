@@ -101,7 +101,20 @@ function nativeField(source: unknown, field: string): unknown {
 }
 
 function nativeStatus(value: unknown): BountyStatus {
-  if (typeof value === "string") return value as BountyStatus;
+  if (Array.isArray(value)) {
+    return nativeStatus(value[0]);
+  }
+  if (typeof value === "number" || typeof value === "bigint") {
+    const statuses: BountyStatus[] = ["Open", "Claimed", "Completed", "Disputed", "Refunded"];
+    return statuses[Number(value)] ?? "Open";
+  }
+  if (typeof value === "string") {
+    if (/^\d+$/.test(value)) {
+      const statuses: BountyStatus[] = ["Open", "Claimed", "Completed", "Disputed", "Refunded"];
+      return statuses[Number(value)] ?? "Open";
+    }
+    return value as BountyStatus;
+  }
   if (value instanceof Map) {
     const first = value.keys().next().value;
     return String(first) as BountyStatus;

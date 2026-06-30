@@ -135,8 +135,15 @@ Freighter must be switched to Testnet before posting, claiming, completing, disp
 
 ## Test Commands
 
+Run contract tests from the repository root:
+
 ```bash
 cargo test
+```
+
+Build-check the frontend:
+
+```bash
 cd frontend && npm run build
 ```
 
@@ -151,7 +158,16 @@ Current test coverage includes:
 
 ## Screenshot Checklist
 
-
+- [Landing page](https://ibb.co/Y7sFq7Y2)
+  ![BountyBoard landing page](https://i.ibb.co/Y7sFq7Y2/image.png)
+- [Bounty listings](https://ibb.co/jZBX1fH3)
+  ![BountyBoard bounty listings](https://i.ibb.co/jZBX1fH3/image.png)
+- [Post bounty form](https://ibb.co/FkSg6ZX0)
+  ![BountyBoard post bounty form](https://i.ibb.co/FkSg6ZX0/image.png)
+- [Bounty detail](https://ibb.co/F4zy17Kk)
+  ![BountyBoard bounty detail](https://i.ibb.co/F4zy17Kk/image.png)
+- [Cargo test](https://ibb.co/WN7hhXPB)
+  ![BountyBoard Cargo test](https://i.ibb.co/WN7hhXPB/image.png)
 
 ## Demo Video
 

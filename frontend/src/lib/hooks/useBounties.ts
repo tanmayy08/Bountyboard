@@ -9,6 +9,10 @@ interface BountyState {
   loading: boolean;
 }
 
+function isSubmissionVisibleBounty(bounty: Bounty) {
+  return bounty.title.trim().toLowerCase() !== "step 9 test bounty";
+}
+
 export function useBounties(status?: BountyStatus | "All") {
   const { address } = useFreighter();
   const [state, setState] = useState<BountyState>({
@@ -34,7 +38,13 @@ export function useBounties(status?: BountyStatus | "All") {
     setState((current) => ({ ...current, error: null, loading: true }));
     getAllBounties(address)
       .then((bounties) => {
-        if (active) setState({ bounties, error: null, loading: false });
+        if (active) {
+          setState({
+            bounties: bounties.filter(isSubmissionVisibleBounty),
+            error: null,
+            loading: false,
+          });
+        }
       })
       .catch((error) => {
         if (active) {

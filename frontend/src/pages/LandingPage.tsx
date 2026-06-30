@@ -79,6 +79,10 @@ function parseXlmAmount(bounty: Bounty) {
   return Number(bounty.amount.replace(" XLM", "")) || 0;
 }
 
+function isSubmissionVisibleBounty(bounty: Bounty) {
+  return bounty.title.trim().toLowerCase() !== "step 9 test bounty";
+}
+
 function formatXlm(value: number) {
   if (value === 0) return "0 XLM";
   if (value < 1) return `${value.toFixed(1)} XLM`;
@@ -98,7 +102,7 @@ export function LandingPage() {
     ])
       .then(([nextBounties, leaderboard]) => {
         if (!active) return;
-        setBounties(nextBounties);
+        setBounties(nextBounties.filter(isSubmissionVisibleBounty));
         setTopSolverScore(leaderboard[0]?.score ?? 100);
       })
       .catch(() => {

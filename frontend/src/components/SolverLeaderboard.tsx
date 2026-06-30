@@ -1,4 +1,4 @@
-import { Trophy } from "lucide-react";
+import { Medal, Trophy } from "lucide-react";
 import { useLeaderboard } from "../lib/hooks/useReputation";
 import { shortenAddress } from "../lib/stellar";
 import { StateBlock } from "./StateBlock";
@@ -31,10 +31,19 @@ export function SolverLeaderboard() {
         <span>Leaderboard</span>
       </CardHeader>
       <div className="divide-y divide-zinc-800">
-        {leaderboard.map((entry) => (
-          <div key={entry.solver} className="flex items-center justify-between px-4 py-3">
-            <span className="text-sm text-zinc-300">{shortenAddress(entry.solver)}</span>
-            <span className="text-sm font-semibold text-white">{entry.score}</span>
+        {leaderboard.map((entry, index) => (
+          <div key={entry.solver} className="flex items-center justify-between gap-3 px-4 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 text-xs font-semibold text-zinc-400">
+                {index === 0 ? (
+                  <Medal aria-hidden="true" size={14} className="text-amber-300" />
+                ) : (
+                  index + 1
+                )}
+              </span>
+              <span className="truncate text-sm text-zinc-300">{shortenAddress(entry.solver)}</span>
+            </div>
+            <span className="shrink-0 text-sm font-semibold text-white">{entry.score}</span>
           </div>
         ))}
       </div>

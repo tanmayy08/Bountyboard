@@ -4,12 +4,14 @@ import { BountyList } from "../components/BountyList";
 import { SolverLeaderboard } from "../components/SolverLeaderboard";
 import { useBounties } from "../lib/hooks/useBounties";
 import { ToggleGroup, ToggleGroupItem } from "../components/ui/ToggleGroup";
+import { useXlmUsdPrice } from "../lib/hooks/useXlmUsdPrice";
 
 const filters: Array<BountyStatus | "All"> = ["All", "Open", "Claimed", "Completed"];
 
 export function BountiesPage() {
   const [filter, setFilter] = useState<BountyStatus | "All">("All");
   const { bounties, error, loading } = useBounties(filter);
+  const xlmUsdPrice = useXlmUsdPrice();
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
@@ -35,7 +37,12 @@ export function BountiesPage() {
             ))}
           </ToggleGroup>
         </div>
-        <BountyList bounties={bounties} error={error} loading={loading} />
+        <BountyList
+          bounties={bounties}
+          error={error}
+          loading={loading}
+          xlmUsdPrice={xlmUsdPrice}
+        />
       </section>
       <aside>
         <SolverLeaderboard />
