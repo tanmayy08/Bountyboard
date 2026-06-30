@@ -26,4 +26,3 @@ mod test {
         assert_eq!(client.version(), Symbol::new(&env, "bounty_v0"));
     }
 }
-
