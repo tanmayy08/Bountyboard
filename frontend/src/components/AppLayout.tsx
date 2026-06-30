@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { ClipboardList, PlusCircle } from "lucide-react";
+import { ClipboardList, Home, PlusCircle } from "lucide-react";
 import { WalletConnect } from "./WalletConnect";
 
 const navItems = [
-  { to: "/", label: "Bounties", icon: ClipboardList },
+  { to: "/", label: "Home", icon: Home },
+  { to: "/bounties", label: "Bounties", icon: ClipboardList },
   { to: "/post", label: "Post", icon: PlusCircle },
 ];
 
@@ -20,7 +21,7 @@ export function AppLayout() {
               Post it. Claim it. Get paid on-chain.
             </span>
           </NavLink>
-          <nav className="order-3 grid w-full grid-cols-2 gap-1 sm:order-none sm:flex sm:w-auto sm:items-center">
+          <nav className="order-3 grid w-full grid-cols-3 gap-1 sm:order-none sm:flex sm:w-auto sm:items-center">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (

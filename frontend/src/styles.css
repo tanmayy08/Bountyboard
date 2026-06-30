@@ -31,3 +31,56 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+.landing-hero-media {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(8, 9, 12, 0.92), rgba(8, 9, 12, 0.58) 48%, rgba(8, 9, 12, 0.9)),
+    radial-gradient(circle at 76% 24%, rgba(16, 185, 129, 0.22), transparent 32%),
+    radial-gradient(circle at 16% 82%, rgba(56, 189, 248, 0.14), transparent 28%),
+    #08090c;
+}
+
+.landing-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 72%, transparent);
+}
+
+.landing-orbit {
+  position: absolute;
+  border: 1px solid rgba(16, 185, 129, 0.16);
+  border-radius: 9999px;
+  transform: rotate(-18deg);
+}
+
+.landing-orbit-one {
+  right: -140px;
+  top: 80px;
+  width: 520px;
+  height: 180px;
+}
+
+.landing-orbit-two {
+  right: 80px;
+  bottom: 90px;
+  width: 360px;
+  height: 120px;
+  border-color: rgba(56, 189, 248, 0.14);
+}
+
+.landing-device {
+  overflow: hidden;
+  border: 1px solid rgba(63, 63, 70, 0.86);
+  border-radius: 8px;
+  background: rgba(8, 9, 12, 0.9);
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  backdrop-filter: blur(18px);
+}

@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import { BountyDetailPage } from "./pages/BountyDetailPage";
 import { BountiesPage } from "./pages/BountiesPage";
+import { LandingPage } from "./pages/LandingPage";
 import { PostBountyPage } from "./pages/PostBountyPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import "./styles.css";
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        element: <LandingPage />,
+      },
+      {
+        path: "bounties",
         element: <BountiesPage />,
       },
       {
