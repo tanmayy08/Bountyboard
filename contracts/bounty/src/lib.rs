@@ -49,6 +49,8 @@ pub enum BountyError {
     IdOverflow = 4,
     BountyNotOpen = 5,
     DeadlinePassed = 6,
+    BountyNotClaimed = 7,
+    DeadlineNotPassed = 8,
 }
 
 #[contractevent(topics = ["BountyPosted"])]
@@ -63,6 +65,12 @@ pub struct BountyPosted {
 pub struct BountyClaimed {
     pub bounty_id: u64,
     pub solver: Address,
+}
+
+#[contractevent(topics = ["BountyDisputed"])]
+pub struct BountyDisputed {
+    pub bounty_id: u64,
+    pub client: Address,
 }
 
 #[contract]
@@ -155,6 +163,54 @@ impl BountyContract {
         extend_bounty_ttl(&env, &bounty_key);
 
         BountyClaimed { bounty_id, solver }.publish(&env);
+
+        Ok(bounty)
+    }
+
+    pub fn dispute_bounty(env: Env, bounty_id: u64) -> Result<BountyConfig, BountyError> {
+        let bounty_key = DataKey::Bounty(bounty_id);
+        let mut bounty = read_bounty(&env, bounty_id)?;
+
+        bounty.client.require_auth();
+
+        if bounty.status != Status::Claimed {
+            return Err(BountyError::BountyNotClaimed);
+        }
+
+        let client = bounty.client.clone();
+        bounty.solver = None;
+        bounty.status = Status::Open;
+
+        env.storage().persistent().set(&bounty_key, &bounty);
+        extend_bounty_ttl(&env, &bounty_key);
+
+        BountyDisputed { bounty_id, client }.publish(&env);
+
+        Ok(bounty)
+    }
+
+    pub fn refund_bounty(env: Env, bounty_id: u64) -> Result<BountyConfig, BountyError> {
+        let bounty_key = DataKey::Bounty(bounty_id);
+        let mut bounty = read_bounty(&env, bounty_id)?;
+
+        bounty.client.require_auth();
+
+        if bounty.status != Status::Open {
+            return Err(BountyError::BountyNotOpen);
+        }
+        if env.ledger().timestamp() <= bounty.deadline {
+            return Err(BountyError::DeadlineNotPassed);
+        }
+
+        let token: Address = env.storage().instance().get(&DataKey::Token).unwrap();
+        let escrow = env.current_contract_address();
+        let refund_to: MuxedAddress = bounty.client.clone().into();
+        TokenClient::new(&env, &token).transfer(&escrow, &refund_to, &bounty.amount);
+
+        bounty.status = Status::Refunded;
+
+        env.storage().persistent().set(&bounty_key, &bounty);
+        extend_bounty_ttl(&env, &bounty_key);
 
         Ok(bounty)
     }
@@ -312,6 +368,139 @@ mod test {
         assert_eq!(
             bounty_client.try_claim_bounty(&bounty_id, &solver),
             Err(Ok(BountyError::DeadlinePassed))
+        );
+    }
+
+    #[test]
+    fn test_dispute_reopens_bounty() {
+        let (env, bounty_client, token_admin_client, _) = setup();
+        let client = Address::generate(&env);
+        let first_solver = Address::generate(&env);
+        let second_solver = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let title = String::from_str(&env, "Fix mobile layout");
+        let description = String::from_str(&env, "Improve bounty card responsiveness");
+        let deadline = env.ledger().timestamp() + 86_400;
+        let bounty_id = bounty_client.post_bounty(&client, &title, &description, &300, &deadline);
+        bounty_client.claim_bounty(&bounty_id, &first_solver);
+
+        let reopened = bounty_client.dispute_bounty(&bounty_id);
+
+        assert_eq!(
+            reopened,
+            BountyConfig {
+                id: bounty_id,
+                client,
+                solver: None,
+                title,
+                description,
+                amount: 300,
+                deadline,
+                status: Status::Open,
+            }
+        );
+
+        let claimed_again = bounty_client.claim_bounty(&bounty_id, &second_solver);
+        assert_eq!(claimed_again.solver, Some(second_solver));
+        assert_eq!(claimed_again.status, Status::Claimed);
+    }
+
+    #[test]
+    fn test_dispute_bounty_rejects_unclaimed_bounty() {
+        let (env, bounty_client, token_admin_client, _) = setup();
+        let client = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let bounty_id = bounty_client.post_bounty(
+            &client,
+            &String::from_str(&env, "Unclaimed"),
+            &String::from_str(&env, "No solver yet"),
+            &300,
+            &(env.ledger().timestamp() + 86_400),
+        );
+
+        assert_eq!(
+            bounty_client.try_dispute_bounty(&bounty_id),
+            Err(Ok(BountyError::BountyNotClaimed))
+        );
+    }
+
+    #[test]
+    fn test_refund_on_deadline() {
+        let (env, bounty_client, token_admin_client, contract_id) = setup();
+        let client = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let title = String::from_str(&env, "Expired open bounty");
+        let description = String::from_str(&env, "Refund after deadline");
+        let deadline = env.ledger().timestamp() + 100;
+        let bounty_id = bounty_client.post_bounty(&client, &title, &description, &400, &deadline);
+
+        assert_eq!(token_admin_client.balance(&client), 600);
+        assert_eq!(token_admin_client.balance(&contract_id), 400);
+
+        env.ledger().set_timestamp(deadline + 1);
+        let refunded = bounty_client.refund_bounty(&bounty_id);
+
+        assert_eq!(
+            refunded,
+            BountyConfig {
+                id: bounty_id,
+                client: client.clone(),
+                solver: None,
+                title,
+                description,
+                amount: 400,
+                deadline,
+                status: Status::Refunded,
+            }
+        );
+        assert_eq!(token_admin_client.balance(&client), 1_000);
+        assert_eq!(token_admin_client.balance(&contract_id), 0);
+    }
+
+    #[test]
+    fn test_refund_rejects_before_deadline_passes() {
+        let (env, bounty_client, token_admin_client, _) = setup();
+        let client = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let bounty_id = bounty_client.post_bounty(
+            &client,
+            &String::from_str(&env, "Too early"),
+            &String::from_str(&env, "Cannot refund before deadline"),
+            &300,
+            &(env.ledger().timestamp() + 86_400),
+        );
+
+        assert_eq!(
+            bounty_client.try_refund_bounty(&bounty_id),
+            Err(Ok(BountyError::DeadlineNotPassed))
+        );
+    }
+
+    #[test]
+    fn test_refund_rejects_claimed_bounty() {
+        let (env, bounty_client, token_admin_client, _) = setup();
+        let client = Address::generate(&env);
+        let solver = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let deadline = env.ledger().timestamp() + 100;
+        let bounty_id = bounty_client.post_bounty(
+            &client,
+            &String::from_str(&env, "Claimed"),
+            &String::from_str(&env, "Cannot refund claimed bounty"),
+            &300,
+            &deadline,
+        );
+        bounty_client.claim_bounty(&bounty_id, &solver);
+        env.ledger().set_timestamp(deadline + 1);
+
+        assert_eq!(
+            bounty_client.try_refund_bounty(&bounty_id),
+            Err(Ok(BountyError::BountyNotOpen))
         );
     }
 
