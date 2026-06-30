@@ -198,6 +198,7 @@ dependencies = [
 name = "bounty_contract"
 version = "0.1.0"
 dependencies = [
+ "reputation_contract",
  "soroban-sdk",
 ]
 

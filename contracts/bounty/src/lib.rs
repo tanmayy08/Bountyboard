@@ -1,5 +1,6 @@
 #![no_std]
 
+use reputation_contract::ReputationContractClient;
 use soroban_sdk::{
     contract, contracterror, contractevent, contractimpl, contracttype, token::TokenClient,
     Address, Env, MuxedAddress, String,
@@ -7,6 +8,8 @@ use soroban_sdk::{
 
 const MIN_TTL: u32 = 17_280;
 const EXTEND_TO: u32 = 518_400;
+const MIN_RATING: u32 = 1;
+const MAX_RATING: u32 = 5;
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -35,6 +38,7 @@ pub struct BountyConfig {
 #[derive(Clone)]
 pub enum DataKey {
     Token,
+    ReputationContract,
     NextBountyId,
     Bounty(u64),
 }
@@ -51,6 +55,8 @@ pub enum BountyError {
     DeadlinePassed = 6,
     BountyNotClaimed = 7,
     DeadlineNotPassed = 8,
+    MissingSolver = 9,
+    InvalidRating = 10,
 }
 
 #[contractevent(topics = ["BountyPosted"])]
@@ -73,13 +79,24 @@ pub struct BountyDisputed {
     pub client: Address,
 }
 
+#[contractevent(topics = ["BountyCompleted"])]
+pub struct BountyCompleted {
+    pub bounty_id: u64,
+    pub client: Address,
+    pub solver: Address,
+    pub rating: u32,
+}
+
 #[contract]
 pub struct BountyContract;
 
 #[contractimpl]
 impl BountyContract {
-    pub fn __constructor(env: Env, token: Address) {
+    pub fn __constructor(env: Env, token: Address, reputation_contract: Address) {
         env.storage().instance().set(&DataKey::Token, &token);
+        env.storage()
+            .instance()
+            .set(&DataKey::ReputationContract, &reputation_contract);
         env.storage().instance().set(&DataKey::NextBountyId, &1u64);
     }
 
@@ -189,6 +206,55 @@ impl BountyContract {
         Ok(bounty)
     }
 
+    pub fn complete_bounty(
+        env: Env,
+        bounty_id: u64,
+        rating: u32,
+    ) -> Result<BountyConfig, BountyError> {
+        let bounty_key = DataKey::Bounty(bounty_id);
+        let mut bounty = read_bounty(&env, bounty_id)?;
+
+        bounty.client.require_auth();
+
+        if bounty.status != Status::Claimed {
+            return Err(BountyError::BountyNotClaimed);
+        }
+        if !(MIN_RATING..=MAX_RATING).contains(&rating) {
+            return Err(BountyError::InvalidRating);
+        }
+
+        let solver = bounty.solver.clone().ok_or(BountyError::MissingSolver)?;
+        let token: Address = env.storage().instance().get(&DataKey::Token).unwrap();
+        let payout_to: MuxedAddress = solver.clone().into();
+        TokenClient::new(&env, &token).transfer(
+            &env.current_contract_address(),
+            &payout_to,
+            &bounty.amount,
+        );
+
+        let reputation_contract: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::ReputationContract)
+            .unwrap();
+        ReputationContractClient::new(&env, &reputation_contract).update_score(&solver, &rating);
+
+        bounty.status = Status::Completed;
+
+        env.storage().persistent().set(&bounty_key, &bounty);
+        extend_bounty_ttl(&env, &bounty_key);
+
+        BountyCompleted {
+            bounty_id,
+            client: bounty.client.clone(),
+            solver,
+            rating,
+        }
+        .publish(&env);
+
+        Ok(bounty)
+    }
+
     pub fn refund_bounty(env: Env, bounty_id: u64) -> Result<BountyConfig, BountyError> {
         let bounty_key = DataKey::Bounty(bounty_id);
         let mut bounty = read_bounty(&env, bounty_id)?;
@@ -238,6 +304,7 @@ fn extend_bounty_ttl(env: &Env, bounty_key: &DataKey) {
 #[cfg(test)]
 mod test {
     use super::*;
+    use reputation_contract::{ReputationContract, ReputationContractClient, ReputationData};
     use soroban_sdk::{
         testutils::{Address as _, Ledger as _},
         token::StellarAssetClient,
@@ -250,6 +317,17 @@ mod test {
         StellarAssetClient<'static>,
         Address,
     ) {
+        let (env, bounty_client, token_admin_client, contract_id, _) = setup_with_reputation();
+        (env, bounty_client, token_admin_client, contract_id)
+    }
+
+    fn setup_with_reputation() -> (
+        Env,
+        BountyContractClient<'static>,
+        StellarAssetClient<'static>,
+        Address,
+        ReputationContractClient<'static>,
+    ) {
         let env = Env::default();
         env.mock_all_auths();
         env.ledger().set_timestamp(1_700_000_000);
@@ -258,10 +336,23 @@ mod test {
         let asset = env.register_stellar_asset_contract_v2(token_admin);
         let token_admin_client = StellarAssetClient::new(&env, &asset.address());
 
-        let contract_id = env.register(BountyContract, (&asset.address(),));
-        let bounty_client = BountyContractClient::new(&env, &contract_id);
+        let bounty_contract_id = Address::generate(&env);
+        let reputation_contract_id = env.register(ReputationContract, (&bounty_contract_id,));
+        let reputation_client = ReputationContractClient::new(&env, &reputation_contract_id);
+        env.register_at(
+            &bounty_contract_id,
+            BountyContract,
+            (&asset.address(), &reputation_contract_id),
+        );
+        let bounty_client = BountyContractClient::new(&env, &bounty_contract_id);
 
-        (env, bounty_client, token_admin_client, contract_id)
+        (
+            env,
+            bounty_client,
+            token_admin_client,
+            bounty_contract_id,
+            reputation_client,
+        )
     }
 
     #[test]
@@ -368,6 +459,94 @@ mod test {
         assert_eq!(
             bounty_client.try_claim_bounty(&bounty_id, &solver),
             Err(Ok(BountyError::DeadlinePassed))
+        );
+    }
+
+    #[test]
+    fn test_complete_bounty_and_reputation_update() {
+        let (env, bounty_client, token_admin_client, contract_id, reputation_client) =
+            setup_with_reputation();
+        let client = Address::generate(&env);
+        let solver = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let title = String::from_str(&env, "Ship escrow flow");
+        let description = String::from_str(&env, "Release funds and update reputation");
+        let deadline = env.ledger().timestamp() + 86_400;
+        let bounty_id = bounty_client.post_bounty(&client, &title, &description, &300, &deadline);
+        bounty_client.claim_bounty(&bounty_id, &solver);
+
+        let completed = bounty_client.complete_bounty(&bounty_id, &5);
+
+        assert_eq!(
+            completed,
+            BountyConfig {
+                id: bounty_id,
+                client,
+                solver: Some(solver.clone()),
+                title,
+                description,
+                amount: 300,
+                deadline,
+                status: Status::Completed,
+            }
+        );
+        assert_eq!(token_admin_client.balance(&contract_id), 0);
+        assert_eq!(token_admin_client.balance(&solver), 300);
+        assert_eq!(
+            reputation_client.get_score(&solver),
+            ReputationData {
+                solver,
+                completed: 1,
+                disputed: 0,
+                score: 100,
+            }
+        );
+    }
+
+    #[test]
+    fn test_complete_bounty_rejects_unclaimed_bounty() {
+        let (env, bounty_client, token_admin_client, _) = setup();
+        let client = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let bounty_id = bounty_client.post_bounty(
+            &client,
+            &String::from_str(&env, "Unclaimed completion"),
+            &String::from_str(&env, "Cannot complete before claim"),
+            &300,
+            &(env.ledger().timestamp() + 86_400),
+        );
+
+        assert_eq!(
+            bounty_client.try_complete_bounty(&bounty_id, &5),
+            Err(Ok(BountyError::BountyNotClaimed))
+        );
+    }
+
+    #[test]
+    fn test_complete_bounty_rejects_invalid_rating() {
+        let (env, bounty_client, token_admin_client, _) = setup();
+        let client = Address::generate(&env);
+        let solver = Address::generate(&env);
+        token_admin_client.mint(&client, &1_000);
+
+        let bounty_id = bounty_client.post_bounty(
+            &client,
+            &String::from_str(&env, "Invalid rating"),
+            &String::from_str(&env, "Rating must be one through five"),
+            &300,
+            &(env.ledger().timestamp() + 86_400),
+        );
+        bounty_client.claim_bounty(&bounty_id, &solver);
+
+        assert_eq!(
+            bounty_client.try_complete_bounty(&bounty_id, &0),
+            Err(Ok(BountyError::InvalidRating))
+        );
+        assert_eq!(
+            bounty_client.try_complete_bounty(&bounty_id, &6),
+            Err(Ok(BountyError::InvalidRating))
         );
     }
 
