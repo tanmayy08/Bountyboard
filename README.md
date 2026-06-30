@@ -34,6 +34,7 @@ Live demo: pending Vercel deployment
 - Reopens disputed bounties so another solver can claim them.
 - Allows client refunds when an open bounty passes its deadline.
 - Shows bounty listings, bounty detail, posting, solver profile, and leaderboard views.
+- Polls Stellar RPC contract events and refreshes bounty/reputation views when on-chain state changes.
 - Uses Freighter for wallet connection and transaction signing.
 
 ## Architecture
@@ -147,6 +148,12 @@ Build-check the frontend:
 cd frontend && npm run build
 ```
 
+Run frontend unit tests:
+
+```bash
+cd frontend && npm run test
+```
+
 Current test coverage includes:
 
 - `test_post_bounty`
@@ -155,6 +162,7 @@ Current test coverage includes:
 - `test_dispute_reopens_bounty`
 - `test_refund_on_deadline`
 - `test_reputation_score_calculation`
+- Frontend tests for status normalization, contract error formatting, and bounty card rendering.
 
 ## Screenshot Checklist
 

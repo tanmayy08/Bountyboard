@@ -1,5 +1,6 @@
 import * as StellarSdk from "@stellar/stellar-sdk";
 import type { Bounty, BountyStatus, ReputationData } from "../types";
+import { formatContractError } from "./contractErrors";
 import { rpc, stellarConfig } from "./stellar";
 
 const STROOPS_PER_XLM = 10_000_000n;
@@ -195,7 +196,7 @@ async function simulateContract(
 
   const simulation = await rpc.simulateTransaction(transaction);
   if (StellarSdk.rpc.Api.isSimulationError(simulation)) {
-    throw new Error(`Simulation failed: ${simulation.error}`);
+    throw new Error(formatContractError(`Simulation failed: ${simulation.error}`));
   }
 
   return { simulation, transaction };

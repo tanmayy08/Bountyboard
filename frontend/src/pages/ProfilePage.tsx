@@ -1,12 +1,14 @@
 import { useParams } from "react-router-dom";
 import { ReputationBadge } from "../components/ReputationBadge";
 import { StateBlock } from "../components/StateBlock";
+import { useContractEvents } from "../lib/hooks/useContractEvents";
 import { useReputation } from "../lib/hooks/useReputation";
 import { shortenAddress } from "../lib/stellar";
 
 export function ProfilePage() {
   const { address } = useParams();
-  const { error, loading, reputation } = useReputation(address);
+  const { error, loading, reputation, refresh } = useReputation(address);
+  useContractEvents({ enabled: Boolean(address), onEvent: refresh });
 
   if (loading) {
     return <StateBlock type="loading" title="Loading profile" message="Reading solver reputation." />;
@@ -36,4 +38,3 @@ export function ProfilePage() {
     </div>
   );
 }
-

@@ -5,12 +5,14 @@ import { SolverLeaderboard } from "../components/SolverLeaderboard";
 import { useBounties } from "../lib/hooks/useBounties";
 import { ToggleGroup, ToggleGroupItem } from "../components/ui/ToggleGroup";
 import { useXlmUsdPrice } from "../lib/hooks/useXlmUsdPrice";
+import { useContractEvents } from "../lib/hooks/useContractEvents";
 
 const filters: Array<BountyStatus | "All"> = ["All", "Open", "Claimed", "Completed"];
 
 export function BountiesPage() {
   const [filter, setFilter] = useState<BountyStatus | "All">("All");
-  const { bounties, error, loading } = useBounties(filter);
+  const { bounties, error, loading, refresh } = useBounties(filter);
+  const eventState = useContractEvents({ onEvent: refresh });
   const xlmUsdPrice = useXlmUsdPrice();
 
   return (
@@ -20,6 +22,18 @@ export function BountiesPage() {
           <div>
             <h1 className="text-2xl font-semibold text-white">Bounties</h1>
             <p className="mt-1 text-sm text-zinc-400">On-chain work ready for Stellar solvers.</p>
+            <p className="mt-2 inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950 px-3 py-1 text-xs text-zinc-400">
+              <span
+                className={
+                  eventState.listening
+                    ? "h-2 w-2 rounded-full bg-emerald-400"
+                    : "h-2 w-2 rounded-full bg-amber-300"
+                }
+              />
+              {eventState.listening
+                ? `Live contract updates${eventState.latestLedger ? ` · ledger ${eventState.latestLedger}` : ""}`
+                : eventState.error ?? "Connecting to contract events"}
+            </p>
           </div>
           <ToggleGroup
             type="single"

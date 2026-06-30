@@ -10,6 +10,7 @@ import { useFreighter } from "./useFreighter";
 
 export function useReputation(address: string | undefined) {
   const { address: readAddress } = useFreighter();
+  const [refreshKey, setRefreshKey] = useState(0);
   const [state, setState] = useState<{
     error: string | null;
     loading: boolean;
@@ -52,13 +53,17 @@ export function useReputation(address: string | undefined) {
     return () => {
       active = false;
     };
-  }, [address, readAddress]);
+  }, [address, readAddress, refreshKey]);
 
-  return state;
+  return {
+    ...state,
+    refresh: () => setRefreshKey((current) => current + 1),
+  };
 }
 
 export function useLeaderboard() {
   const { address } = useFreighter();
+  const [refreshKey, setRefreshKey] = useState(0);
   const [state, setState] = useState<{
     error: string | null;
     leaderboard: ReputationData[];
@@ -101,7 +106,10 @@ export function useLeaderboard() {
     return () => {
       active = false;
     };
-  }, [address]);
+  }, [address, refreshKey]);
 
-  return state;
+  return {
+    ...state,
+    refresh: () => setRefreshKey((current) => current + 1),
+  };
 }

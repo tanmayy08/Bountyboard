@@ -24,6 +24,7 @@ import {
 } from "../lib/contracts";
 import { bountyStatusLabel, bountyStatusVariant, normalizeBountyStatus } from "../lib/bountyStatus";
 import { useBounty } from "../lib/hooks/useBounties";
+import { useContractEvents } from "../lib/hooks/useContractEvents";
 import { useFreighter } from "../lib/hooks/useFreighter";
 import { shortenAddress } from "../lib/stellar";
 
@@ -32,6 +33,7 @@ const timeline = ["Open", "Claimed", "Completed"];
 export function BountyDetailPage() {
   const { id } = useParams();
   const { bounty, error, loading, refresh } = useBounty(id);
+  const eventState = useContractEvents({ enabled: Boolean(id), onEvent: refresh });
   const { address, connect, network, sign } = useFreighter();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -102,6 +104,16 @@ export function BountyDetailPage() {
       <Card as="section">
         <CardContent className="p-5">
         <Badge variant={bountyStatusVariant(status)}>{status}</Badge>
+        <span className="ml-2 inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950 px-2.5 py-1 align-middle text-xs text-zinc-400">
+          <span
+            className={
+              eventState.listening
+                ? "h-2 w-2 rounded-full bg-emerald-400"
+                : "h-2 w-2 rounded-full bg-amber-300"
+            }
+          />
+          {eventState.listening ? "Live" : "Syncing"}
+        </span>
         <h1 className="mt-2 text-2xl font-semibold text-white">{bounty.title}</h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-300">{bounty.description}</p>
         <div className="mt-5 grid gap-3 rounded-2xl border border-zinc-800 bg-[#08090c] p-4 text-sm sm:grid-cols-3">

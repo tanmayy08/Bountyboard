@@ -15,6 +15,7 @@ function isSubmissionVisibleBounty(bounty: Bounty) {
 
 export function useBounties(status?: BountyStatus | "All") {
   const { address } = useFreighter();
+  const [refreshKey, setRefreshKey] = useState(0);
   const [state, setState] = useState<BountyState>({
     bounties: [],
     error: null,
@@ -59,7 +60,7 @@ export function useBounties(status?: BountyStatus | "All") {
     return () => {
       active = false;
     };
-  }, [address]);
+  }, [address, refreshKey]);
 
   const bounties = useMemo(() => {
     if (!status || status === "All") return state.bounties;
@@ -69,6 +70,7 @@ export function useBounties(status?: BountyStatus | "All") {
   return {
     ...state,
     bounties,
+    refresh: () => setRefreshKey((current) => current + 1),
   };
 }
 

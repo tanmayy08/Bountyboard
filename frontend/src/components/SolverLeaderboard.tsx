@@ -1,11 +1,13 @@
 import { Medal, Trophy } from "lucide-react";
+import { useContractEvents } from "../lib/hooks/useContractEvents";
 import { useLeaderboard } from "../lib/hooks/useReputation";
 import { shortenAddress } from "../lib/stellar";
 import { StateBlock } from "./StateBlock";
 import { Card, CardHeader } from "./ui/Card";
 
 export function SolverLeaderboard() {
-  const { error, leaderboard, loading } = useLeaderboard();
+  const { error, leaderboard, loading, refresh } = useLeaderboard();
+  useContractEvents({ onEvent: refresh });
 
   if (loading) {
     return <StateBlock type="loading" title="Loading leaderboard" message="Reading solver reputation." />;
