@@ -1,9 +1,8 @@
 #![no_std]
 
-use reputation_contract::ReputationContractClient;
 use soroban_sdk::{
     contract, contracterror, contractevent, contractimpl, contracttype, token::TokenClient,
-    Address, Env, MuxedAddress, String,
+    vec, Address, Env, IntoVal, MuxedAddress, String, Symbol, Val,
 };
 
 const MIN_TTL: u32 = 17_280;
@@ -237,7 +236,11 @@ impl BountyContract {
             .instance()
             .get(&DataKey::ReputationContract)
             .unwrap();
-        ReputationContractClient::new(&env, &reputation_contract).update_score(&solver, &rating);
+        let _: Val = env.invoke_contract(
+            &reputation_contract,
+            &Symbol::new(&env, "update_score"),
+            vec![&env, solver.into_val(&env), rating.into_val(&env)],
+        );
 
         bounty.status = Status::Completed;
 
@@ -283,6 +286,15 @@ impl BountyContract {
 
     pub fn get_bounty(env: Env, bounty_id: u64) -> Result<BountyConfig, BountyError> {
         read_bounty(&env, bounty_id)
+    }
+
+    pub fn get_bounty_count(env: Env) -> u64 {
+        let next_bounty_id: u64 = env
+            .storage()
+            .instance()
+            .get(&DataKey::NextBountyId)
+            .unwrap_or(1);
+        next_bounty_id.saturating_sub(1)
     }
 }
 
@@ -369,6 +381,7 @@ mod test {
         let bounty = bounty_client.get_bounty(&bounty_id);
 
         assert_eq!(bounty_id, 1);
+        assert_eq!(bounty_client.get_bounty_count(), 1);
         assert_eq!(
             bounty,
             BountyConfig {

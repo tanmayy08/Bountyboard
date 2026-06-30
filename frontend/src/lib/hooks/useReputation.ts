@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import type { ReputationData } from "../../types";
-import { missingContractConfig } from "../contracts";
+import {
+  getLeaderboard,
+  getReputation,
+  missingContractConfig,
+  missingReadSource,
+} from "../contracts";
+import { useFreighter } from "./useFreighter";
 
 export function useReputation(address: string | undefined) {
+  const { address: readAddress } = useFreighter();
   const [state, setState] = useState<{
     error: string | null;
     loading: boolean;
@@ -14,18 +21,44 @@ export function useReputation(address: string | undefined) {
   });
 
   useEffect(() => {
+    let active = true;
     const configError = missingContractConfig();
-    setState({
-      error: configError ?? (address ? null : "Solver address is missing."),
-      loading: false,
-      reputation: null,
-    });
-  }, [address]);
+    const sourceError = missingReadSource(readAddress);
+
+    if (configError || sourceError || !address) {
+      setState({
+        error: configError ?? sourceError ?? "Solver address is missing.",
+        loading: false,
+        reputation: null,
+      });
+      return;
+    }
+
+    setState((current) => ({ ...current, error: null, loading: true }));
+    getReputation(address, readAddress)
+      .then((reputation) => {
+        if (active) setState({ error: null, loading: false, reputation });
+      })
+      .catch((error) => {
+        if (active) {
+          setState({
+            error: error instanceof Error ? error.message : "Unable to load reputation.",
+            loading: false,
+            reputation: null,
+          });
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [address, readAddress]);
 
   return state;
 }
 
 export function useLeaderboard() {
+  const { address } = useFreighter();
   const [state, setState] = useState<{
     error: string | null;
     leaderboard: ReputationData[];
@@ -37,13 +70,38 @@ export function useLeaderboard() {
   });
 
   useEffect(() => {
-    setState({
-      error: missingContractConfig(),
-      leaderboard: [],
-      loading: false,
-    });
-  }, []);
+    let active = true;
+    const configError = missingContractConfig();
+    const sourceError = missingReadSource(address);
+
+    if (configError || sourceError) {
+      setState({
+        error: configError ?? sourceError,
+        leaderboard: [],
+        loading: false,
+      });
+      return;
+    }
+
+    setState((current) => ({ ...current, error: null, loading: true }));
+    getLeaderboard(address)
+      .then((leaderboard) => {
+        if (active) setState({ error: null, leaderboard, loading: false });
+      })
+      .catch((error) => {
+        if (active) {
+          setState({
+            error: error instanceof Error ? error.message : "Unable to load leaderboard.",
+            leaderboard: [],
+            loading: false,
+          });
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [address]);
 
   return state;
 }
-

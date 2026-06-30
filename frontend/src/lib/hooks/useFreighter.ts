@@ -121,14 +121,13 @@ export function useFreighter() {
 
   const sign = useCallback(
     async (xdr: string, networkPassphrase: string) => {
-      if (!state.connected) throw new Error("Wallet is not connected.");
       const { signedTxXdr, error } = await signTransaction(xdr, {
         networkPassphrase,
       });
       if (error) throw new Error(error.message);
       return signedTxXdr;
     },
-    [state.connected],
+    [],
   );
 
   return {
@@ -139,4 +138,3 @@ export function useFreighter() {
     sign,
   };
 }
-
