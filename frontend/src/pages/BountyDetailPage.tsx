@@ -2,6 +2,10 @@ import { useParams } from "react-router-dom";
 import { CheckCircle2, Circle, HandCoins, RefreshCcw, ShieldCheck, XCircle } from "lucide-react";
 import { useState } from "react";
 import { StateBlock } from "../components/StateBlock";
+import { Badge } from "../components/ui/Badge";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
+import { Select } from "../components/ui/Select";
 import {
   assertWalletNetwork,
   claimBounty,
@@ -62,8 +66,9 @@ export function BountyDetailPage() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
-      <section className="rounded-md border border-zinc-800 bg-zinc-950 p-5">
-        <div className="text-sm font-medium text-emerald-400">{bounty.status}</div>
+      <Card as="section">
+        <CardContent className="p-5">
+        <Badge variant={bounty.status === "Open" ? "success" : "default"}>{bounty.status}</Badge>
         <h1 className="mt-2 text-2xl font-semibold text-white">{bounty.title}</h1>
         <p className="mt-4 text-sm leading-6 text-zinc-300">{bounty.description}</p>
         <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
@@ -88,35 +93,33 @@ export function BountyDetailPage() {
         </dl>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {isOpen ? (
-            <button
+            <Button
               type="button"
               disabled={actionLoading || deadlinePassed}
               onClick={() =>
                 void runAction("Claim bounty", (solver) => claimBounty(bounty.id, solver, sign))
               }
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <HandCoins aria-hidden="true" size={17} />
               <span>{actionLoading ? "Working" : "Claim bounty"}</span>
-            </button>
+            </Button>
           ) : null}
           {isClaimed && isClient ? (
             <>
-              <label className="inline-flex h-11 items-center gap-2 rounded-md border border-zinc-800 bg-[#08090c] px-3 text-sm text-zinc-300">
+              <label className="inline-flex h-11 items-center gap-2 rounded-full border border-zinc-800 bg-[#08090c] px-3 text-sm text-zinc-300">
                 <span>Rating</span>
-                <select
+                <Select
                   value={rating}
                   onChange={(event) => setRating(Number(event.target.value))}
-                  className="bg-transparent text-white outline-none"
                 >
                   {[5, 4, 3, 2, 1].map((value) => (
                     <option key={value} value={value} className="bg-zinc-950">
                       {value}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
-              <button
+              <Button
                 type="button"
                 disabled={actionLoading}
                 onClick={() =>
@@ -124,48 +127,49 @@ export function BountyDetailPage() {
                     completeBounty(bounty.id, client, rating, sign),
                   )
                 }
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShieldCheck aria-hidden="true" size={17} />
                 <span>Complete</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 disabled={actionLoading}
                 onClick={() =>
                   void runAction("Dispute bounty", (client) => disputeBounty(bounty.id, client, sign))
                 }
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-red-500/40 px-4 text-sm font-semibold text-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+                variant="danger"
               >
                 <XCircle aria-hidden="true" size={17} />
                 <span>Dispute</span>
-              </button>
+              </Button>
             </>
           ) : null}
           {isOpen && isClient && deadlinePassed ? (
-            <button
+            <Button
               type="button"
               disabled={actionLoading}
               onClick={() =>
                 void runAction("Refund bounty", (client) => refundBounty(bounty.id, client, sign))
               }
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-zinc-700 px-4 text-sm font-semibold text-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
+              variant="outline"
             >
               <RefreshCcw aria-hidden="true" size={17} />
               <span>Refund</span>
-            </button>
+            </Button>
           ) : null}
         </div>
         {deadlinePassed && isOpen ? (
           <p className="mt-3 text-sm text-amber-200">Deadline has passed. This bounty can no longer be claimed.</p>
         ) : null}
         {actionMessage ? (
-          <div className="mt-4 rounded-md border border-zinc-800 bg-[#08090c] px-3 py-2 text-sm text-zinc-300">
+          <div className="mt-4 rounded-xl border border-zinc-800 bg-[#08090c] px-3 py-2 text-sm text-zinc-300">
             {actionMessage}
           </div>
         ) : null}
-      </section>
-      <aside className="rounded-md border border-zinc-800 bg-zinc-950 p-4">
+        </CardContent>
+      </Card>
+      <Card as="aside">
+        <CardContent>
         <h2 className="text-sm font-semibold text-white">Status</h2>
         <div className="mt-4 grid gap-3">
           {timeline.map((item) => {
@@ -182,7 +186,8 @@ export function BountyDetailPage() {
             );
           })}
         </div>
-      </aside>
+        </CardContent>
+      </Card>
     </div>
   );
 }

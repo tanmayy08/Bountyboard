@@ -10,13 +10,13 @@ export function Calendar({ className, ...props }: DayPickerProps) {
         month_caption: "flex h-9 items-center justify-center text-sm font-medium",
         nav: "absolute right-3 top-3 flex items-center gap-1",
         button_previous:
-          "inline-flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 text-zinc-400 hover:text-white",
+          "inline-flex h-7 w-7 items-center justify-center rounded-full border border-zinc-800 text-zinc-400 hover:text-white",
         button_next:
-          "inline-flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 text-zinc-400 hover:text-white",
+          "inline-flex h-7 w-7 items-center justify-center rounded-full border border-zinc-800 text-zinc-400 hover:text-white",
         weekdays: "mt-2 grid grid-cols-7 text-xs text-zinc-500",
         weekday: "flex h-8 items-center justify-center",
         week: "grid grid-cols-7",
-        day: "flex h-9 w-9 items-center justify-center rounded-md text-sm text-zinc-300 hover:bg-zinc-900",
+        day: "flex h-9 w-9 items-center justify-center rounded-full text-sm text-zinc-300 hover:bg-zinc-900",
         selected: "bg-emerald-500 text-zinc-950 hover:bg-emerald-500",
         today: "border border-emerald-500/50",
         outside: "text-zinc-700",

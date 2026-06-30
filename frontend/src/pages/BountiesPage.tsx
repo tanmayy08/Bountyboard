@@ -3,6 +3,7 @@ import type { BountyStatus } from "../types";
 import { BountyList } from "../components/BountyList";
 import { SolverLeaderboard } from "../components/SolverLeaderboard";
 import { useBounties } from "../lib/hooks/useBounties";
+import { ToggleGroup, ToggleGroupItem } from "../components/ui/ToggleGroup";
 
 const filters: Array<BountyStatus | "All"> = ["All", "Open", "Claimed", "Completed"];
 
@@ -18,23 +19,21 @@ export function BountiesPage() {
             <h1 className="text-2xl font-semibold text-white">Bounties</h1>
             <p className="mt-1 text-sm text-zinc-400">On-chain work ready for Stellar solvers.</p>
           </div>
-          <div className="inline-grid grid-cols-4 rounded-md border border-zinc-800 bg-zinc-950 p-1">
+          <ToggleGroup
+            type="single"
+            value={filter}
+            onValueChange={(value) => value && setFilter(value as BountyStatus | "All")}
+            className="inline-grid grid-cols-4 rounded-full border border-zinc-800 bg-zinc-950 p-1"
+          >
             {filters.map((item) => (
-              <button
+              <ToggleGroupItem
                 key={item}
-                type="button"
-                onClick={() => setFilter(item)}
-                className={[
-                  "h-9 rounded px-3 text-sm transition",
-                  filter === item
-                    ? "bg-emerald-500 text-zinc-950"
-                    : "text-zinc-400 hover:text-white",
-                ].join(" ")}
+                value={item}
               >
                 {item}
-              </button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
         </div>
         <BountyList bounties={bounties} error={error} loading={loading} />
       </section>
@@ -44,4 +43,3 @@ export function BountiesPage() {
     </div>
   );
 }
-

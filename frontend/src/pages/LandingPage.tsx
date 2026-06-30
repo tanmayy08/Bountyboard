@@ -13,9 +13,12 @@ import {
   Trophy,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { contractConfig, getAllBounties, getLeaderboard } from "../lib/contracts";
 import type { Bounty } from "../types";
+import { Badge } from "../components/ui/Badge";
+import { ButtonLink, ExternalButtonLink } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
+import Antigravity from "../components/backgrounds/Antigravity";
 
 const lifecycle = [
   { label: "Posted", icon: ClipboardList },
@@ -120,22 +123,39 @@ export function LandingPage() {
   }, [bounties, topSolverScore]);
 
   return (
-    <div className="-mx-4 -mt-5 sm:-mx-6 sm:-mt-8">
-      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b border-zinc-800 bg-[#08090c]">
+    <div className="relative left-1/2 -mt-5 w-screen -translate-x-1/2 sm:-mt-8">
+      <section className="relative overflow-hidden border-b border-zinc-800 bg-[#08090c]">
         <div className="absolute inset-0 opacity-70">
           <div className="landing-hero-media" aria-hidden="true">
+            <Antigravity
+              count={260}
+              magnetRadius={9}
+              ringRadius={8}
+              waveSpeed={0.38}
+              waveAmplitude={0.8}
+              particleSize={1.35}
+              lerpSpeed={0.055}
+              color="#10b981"
+              autoAnimate
+              particleVariance={0.8}
+              rotationSpeed={0.08}
+              depthFactor={0.85}
+              pulseSpeed={2.8}
+              particleShape="capsule"
+              fieldStrength={12}
+            />
             <div className="landing-orbit landing-orbit-one" />
             <div className="landing-orbit landing-orbit-two" />
             <div className="landing-grid" />
           </div>
         </div>
-        <div className="relative mx-auto grid min-h-[calc(100vh-64px)] max-w-6xl content-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:py-12">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:py-14">
           <div className="flex flex-col justify-center">
-            <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+            <Badge variant="success" className="mb-4 w-fit gap-2 px-3 py-2 text-sm">
               <ShieldCheck aria-hidden="true" size={16} />
               <span>Stellar testnet verified</span>
-            </div>
-            <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+            </Badge>
+            <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
               BountyBoard
             </h1>
             <p className="mt-4 max-w-xl text-base leading-7 text-zinc-300 sm:text-lg">
@@ -143,36 +163,24 @@ export function LandingPage() {
               connected Soroban contracts.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
+              <ButtonLink
                 to="/bounties"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400"
               >
                 <span>Explore bounties</span>
                 <ArrowRight aria-hidden="true" size={17} />
-              </Link>
-              <Link
+              </ButtonLink>
+              <ButtonLink
                 to="/post"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-zinc-700 bg-zinc-950/70 px-4 text-sm font-semibold text-zinc-100 transition hover:border-sky-400 hover:text-sky-200"
+                variant="outline"
               >
                 <CircleDollarSign aria-hidden="true" size={17} />
                 <span>Post bounty</span>
-              </Link>
-            </div>
-            <div className="mt-8 grid max-w-xl grid-cols-3 gap-2">
-              {stats.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-md border border-zinc-800 bg-zinc-950/70 p-3"
-                >
-                  <div className="text-xl font-semibold text-white">{item.value}</div>
-                  <div className="mt-1 text-xs leading-5 text-zinc-500">{item.label}</div>
-                </div>
-              ))}
+              </ButtonLink>
             </div>
           </div>
 
-          <div className="relative flex min-h-[420px] items-center lg:min-h-[560px]">
-            <div className="landing-device w-full">
+          <div className="relative flex items-center justify-center">
+            <div className="landing-device w-full max-w-md">
               <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
@@ -181,73 +189,77 @@ export function LandingPage() {
                 </div>
                 <div className="h-2 w-28 rounded-full bg-zinc-800" />
               </div>
-              <div className="grid gap-4 p-4 lg:grid-cols-[1fr_0.72fr]">
-                <div className="grid gap-3">
-                  <div className="rounded-md border border-zinc-800 bg-[#101218] p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="text-xs text-emerald-300">Open bounty</div>
-                        <div className="mt-2 text-base font-semibold text-white">
-                          Design landing page
-                        </div>
-                        <p className="mt-2 max-w-56 text-sm leading-6 text-zinc-400">
-                          Build a polished hero, lifecycle flow, and verified deployment links.
-                        </p>
-                      </div>
-                      <div className="rounded-md bg-emerald-400 px-2 py-1 text-xs font-semibold text-zinc-950">
-                        50 XLM
-                      </div>
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-medium uppercase tracking-wide text-emerald-300">
+                      Active marketplace
                     </div>
-                    <div className="mt-5 h-2 rounded-full bg-zinc-800">
-                      <div className="h-2 w-2/3 rounded-full bg-emerald-400" />
-                    </div>
+                    <h2 className="mt-2 text-xl font-semibold text-white">Solver work queue</h2>
+                    <p className="mt-2 text-sm leading-6 text-zinc-400">
+                      Escrow status, solver reputation, and bounty lifecycle in one on-chain view.
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {previewBounties.map((item) => (
-                      <div
-                        key={item.title}
-                        className="rounded-md border border-zinc-800 bg-[#101218] p-3"
-                      >
-                        <div className={`text-xs font-medium ${item.tone}`}>{item.status}</div>
-                        <div className="mt-2 text-sm font-semibold leading-5 text-white">
-                          {item.title}
-                        </div>
-                        <div className="mt-3 inline-flex rounded-md border border-zinc-800 px-2 py-1 text-xs text-zinc-300">
-                          {item.amount}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <Badge variant="success">Verified</Badge>
                 </div>
 
-                <div className="grid gap-3">
-                  <div className="rounded-md border border-zinc-800 bg-[#101218] p-4">
-                    <div className="flex items-center gap-2 text-sm font-medium text-white">
-                      <Trophy aria-hidden="true" size={17} className="text-amber-300" />
-                      <span>Solver score</span>
-                    </div>
-                    <div className="mt-4 text-4xl font-semibold text-white">{topSolverScore}</div>
-                    <div className="mt-3 h-2 rounded-full bg-zinc-800">
-                      <div className="h-2 w-full rounded-full bg-amber-300" />
-                    </div>
-                  </div>
-                  <div className="rounded-md border border-zinc-800 bg-[#101218] p-4">
-                    <div className="grid gap-3">
-                      {lifecycle.map((item, index) => {
-                        const Icon = item.icon;
-                        return (
-                          <div key={item.label} className="flex items-center gap-3">
-                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-300">
-                              <Icon aria-hidden="true" size={16} />
-                            </span>
-                            <span className="text-sm text-zinc-300">{item.label}</span>
-                            {index < lifecycle.length - 1 ? (
-                              <span className="ml-auto h-px w-8 bg-zinc-700" />
-                            ) : null}
+                <div className="mt-5 grid gap-3">
+                  {previewBounties.map((item) => (
+                    <Card key={item.title} className="bg-[#101218]/90">
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className={`text-xs font-medium ${item.tone}`}>{item.status}</div>
+                            <div className="mt-1 text-sm font-semibold leading-5 text-white">
+                              {item.title}
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <Badge>{item.amount}</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-[0.72fr_1fr]">
+                  <Card className="bg-[#101218]/90">
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-2 text-sm font-medium text-white">
+                        <Trophy aria-hidden="true" size={17} className="text-amber-300" />
+                        <span>Top score</span>
+                      </div>
+                      <div className="mt-3 text-4xl font-semibold text-white">{topSolverScore}</div>
+                      <div className="mt-3 h-2 rounded-full bg-zinc-800">
+                        <div className="h-2 w-full rounded-full bg-amber-300" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-[#101218]/90">
+                    <CardContent className="p-3">
+                      <div className="grid gap-2">
+                        {lifecycle.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <div key={item.label} className="flex items-center gap-2">
+                              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
+                                <Icon aria-hidden="true" size={14} />
+                              </span>
+                              <span className="text-sm text-zinc-300">{item.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-zinc-800 bg-[#0d1016] p-3">
+                  <div className="mb-2 flex items-center justify-between text-xs text-zinc-500">
+                    <span>Escrow progress</span>
+                    <span>Claimed</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-zinc-800">
+                    <div className="h-2 w-2/3 rounded-full bg-emerald-400" />
                   </div>
                 </div>
               </div>
@@ -256,36 +268,52 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="border-b border-zinc-800 bg-[#0b0d11] px-4 py-10 sm:px-6">
+      <section className="border-b border-zinc-800 bg-[#08090c] px-4 py-4 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-3 sm:grid-cols-3">
+          {stats.map((item, index) => (
+            <div
+              key={item.label}
+              className="flex items-center justify-between border-zinc-800 py-2 sm:border-r sm:px-8 last:sm:border-r-0"
+            >
+              <div className="text-xs uppercase tracking-wide text-zinc-500">{item.label}</div>
+              <div className="text-xl font-semibold text-white">{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-b border-zinc-800 bg-[#0b0d11] px-4 py-7 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-2xl font-semibold text-white">How it works</h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">
             A simple on-chain bounty lifecycle built for clients and solvers.
           </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {howItWorks.map((item, index) => {
               const Icon = item.icon;
               return (
-                <div key={item.label} className="rounded-md border border-zinc-800 bg-zinc-950 p-4">
+                <Card key={item.label}>
+                  <CardContent>
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-300">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
                       <Icon aria-hidden="true" size={18} />
                     </span>
                     <span className="text-xs font-medium text-zinc-600">0{index + 1}</span>
                   </div>
                   <h3 className="text-base font-semibold text-white">{item.label}</h3>
                   <p className="mt-2 text-sm leading-6 text-zinc-400">{item.description}</p>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="border-b border-zinc-800 bg-[#08090c] px-4 py-5 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 rounded-md border border-emerald-500/20 bg-emerald-500/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="border-b border-zinc-800 bg-[#08090c] px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-300">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
               <ShieldCheck aria-hidden="true" size={18} />
             </span>
             <div>
@@ -297,25 +325,26 @@ export function LandingPage() {
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             {contracts.map((contract) => (
-              <a
+              <ExternalButtonLink
                 key={contract.label}
                 href={contractUrl(contract.address)}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 px-3 text-sm text-zinc-200 transition hover:border-emerald-500 hover:text-emerald-200"
+                size="sm"
+                variant="outline"
               >
                 <span>{contract.label}</span>
                 <span className="font-mono text-xs text-zinc-500">
                   {shortAddress(contract.address)}
                 </span>
                 <ExternalLink aria-hidden="true" size={14} />
-              </a>
+              </ExternalButtonLink>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-b border-zinc-800 bg-[#0b0d11] px-4 py-10 sm:px-6">
+      <section className="border-b border-zinc-800 bg-[#0b0d11] px-4 py-7 sm:px-6">
         <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <h2 className="text-2xl font-semibold text-white">On-chain work lifecycle</h2>
@@ -326,8 +355,9 @@ export function LandingPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {proof.map((item, index) => (
-              <div key={item} className="rounded-md border border-zinc-800 bg-zinc-950 p-4">
-                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-md bg-zinc-900 text-emerald-300">
+              <Card key={item}>
+                <CardContent>
+                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-emerald-300">
                   {index === 2 ? (
                     <Gavel aria-hidden="true" size={16} />
                   ) : (
@@ -335,7 +365,8 @@ export function LandingPage() {
                   )}
                 </div>
                 <div className="text-sm leading-6 text-zinc-200">{item}</div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -348,33 +379,36 @@ export function LandingPage() {
             <div className="mt-1 text-xs">Post it. Claim it. Get paid on-chain.</div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <a
+            <ExternalButtonLink
               href="https://github.com/tanmayy08/Bountyboard"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-800 px-3 transition hover:border-emerald-500 hover:text-emerald-200"
+              size="sm"
+              variant="outline"
             >
               <Code2 aria-hidden="true" size={15} />
               <span>GitHub</span>
-            </a>
-            <a
+            </ExternalButtonLink>
+            <ExternalButtonLink
               href={contractUrl(contractConfig.bountyContractId)}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-800 px-3 transition hover:border-emerald-500 hover:text-emerald-200"
+              size="sm"
+              variant="outline"
             >
               <ExternalLink aria-hidden="true" size={15} />
               <span>Contracts</span>
-            </a>
-            <a
+            </ExternalButtonLink>
+            <ExternalButtonLink
               href="https://github.com/tanmayy08/Bountyboard#readme"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-800 px-3 transition hover:border-emerald-500 hover:text-emerald-200"
+              size="sm"
+              variant="outline"
             >
               <BookOpen aria-hidden="true" size={15} />
               <span>Docs</span>
-            </a>
+            </ExternalButtonLink>
           </div>
         </div>
       </footer>

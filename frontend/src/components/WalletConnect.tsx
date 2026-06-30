@@ -1,6 +1,7 @@
 import { LogOut, Wallet } from "lucide-react";
 import { useFreighter } from "../lib/hooks/useFreighter";
 import { shortenAddress } from "../lib/stellar";
+import { Button } from "./ui/Button";
 
 export function WalletConnect() {
   const { address, connected, connect, disconnect, error, loading, network } =
@@ -15,14 +16,15 @@ export function WalletConnect() {
           </div>
           <div className="text-xs text-zinc-500">{network ?? "Unknown network"}</div>
         </div>
-        <button
+        <Button
           type="button"
           onClick={disconnect}
           title="Disconnect wallet"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-zinc-800 bg-zinc-950 text-zinc-300 transition hover:border-red-500 hover:text-red-300"
+          size="icon"
+          variant="danger"
         >
           <LogOut aria-hidden="true" size={18} />
-        </button>
+        </Button>
       </div>
     );
   }
@@ -30,15 +32,15 @@ export function WalletConnect() {
   return (
     <div className="flex items-center gap-2">
       {error ? <span className="hidden max-w-44 truncate text-xs text-red-300 md:block">{error}</span> : null}
-      <button
+      <Button
         type="button"
         onClick={() => void connect()}
         disabled={loading}
-        className="inline-flex h-10 items-center gap-2 rounded-md bg-emerald-500 px-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+        size="sm"
       >
         <Wallet aria-hidden="true" size={17} />
         <span className="hidden sm:inline">{loading ? "Checking" : "Connect"}</span>
-      </button>
+      </Button>
     </div>
   );
 }

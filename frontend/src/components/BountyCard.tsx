@@ -1,15 +1,19 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock } from "lucide-react";
 import type { Bounty } from "../types";
+import { Badge } from "./ui/Badge";
+import { ButtonLink } from "./ui/Button";
+import { Card, CardContent } from "./ui/Card";
 
 export function BountyCard({ bounty }: { bounty: Bounty }) {
   return (
-    <article className="rounded-md border border-zinc-800 bg-zinc-950 p-4">
+    <Card as="article">
+      <CardContent>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wide text-emerald-400">
+          <Badge variant={bounty.status === "Open" ? "success" : "default"}>
             {bounty.status}
-          </div>
+          </Badge>
           <h3 className="mt-1 truncate text-base font-semibold text-white">{bounty.title}</h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-400">
             {bounty.description}
@@ -23,14 +27,16 @@ export function BountyCard({ bounty }: { bounty: Bounty }) {
           </div>
         </div>
       </div>
-      <Link
+      <ButtonLink
         to={`/bounty/${bounty.id}`}
-        className="mt-4 inline-flex h-9 items-center gap-2 rounded-md border border-zinc-800 px-3 text-sm text-zinc-200 transition hover:border-emerald-500 hover:text-emerald-300"
+        className="mt-4"
+        size="sm"
+        variant="outline"
       >
         <span>Open</span>
         <ArrowRight aria-hidden="true" size={16} />
-      </Link>
-    </article>
+      </ButtonLink>
+      </CardContent>
+    </Card>
   );
 }
-

@@ -114,11 +114,11 @@ export function PostBountyForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="overflow-hidden rounded-md border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30"
+      className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/30"
     >
       <div className="border-b border-zinc-800 bg-[#101218] px-4 py-4 sm:px-5">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-300">
+          <div className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
             <Sparkles aria-hidden="true" size={18} />
           </div>
           <div>
@@ -132,7 +132,7 @@ export function PostBountyForm() {
 
       <div className="grid gap-5 p-4 sm:p-5">
         {configError ? (
-          <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
             {configError}
           </div>
         ) : null}
@@ -156,7 +156,7 @@ export function PostBountyForm() {
         </label>
 
         <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-          <div className="rounded-md border border-zinc-800 bg-[#0b0d11] p-3">
+          <div className="rounded-2xl border border-zinc-800 bg-[#0b0d11] p-3">
             <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <label className="text-sm font-medium text-zinc-200">Reward amount</label>
@@ -166,7 +166,7 @@ export function PostBountyForm() {
                 type="single"
                 value={amountMode}
                 onValueChange={(value) => value && setAmountMode(value as AmountMode)}
-                className="grid w-full grid-cols-2 rounded-md border border-zinc-800 bg-zinc-950 p-1 sm:w-44"
+                className="grid w-full grid-cols-2 rounded-full border border-zinc-800 bg-zinc-950 p-1 sm:w-44"
               >
                 <ToggleGroupItem value="xlm">XLM</ToggleGroupItem>
                 <ToggleGroupItem value="usd">USD</ToggleGroupItem>
@@ -199,7 +199,7 @@ export function PostBountyForm() {
 
           </div>
 
-          <div className="rounded-md border border-zinc-800 bg-[#0b0d11] p-3">
+          <div className="rounded-2xl border border-zinc-800 bg-[#0b0d11] p-3">
             <label className="text-sm font-medium text-zinc-200">Deadline</label>
             <p className="mt-1 text-xs text-zinc-500">Choose a date and exact time.</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_132px] lg:grid-cols-1 xl:grid-cols-[1fr_132px]">
@@ -239,7 +239,7 @@ export function PostBountyForm() {
         </div>
 
         {submitMessage ? (
-          <div className="rounded-md border border-zinc-800 bg-[#08090c] px-3 py-2 text-sm text-zinc-300">
+          <div className="rounded-xl border border-zinc-800 bg-[#08090c] px-3 py-2 text-sm text-zinc-300">
             {submitMessage}
           </div>
         ) : null}

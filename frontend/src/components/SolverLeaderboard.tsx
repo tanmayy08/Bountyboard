@@ -2,6 +2,7 @@ import { Trophy } from "lucide-react";
 import { useLeaderboard } from "../lib/hooks/useReputation";
 import { shortenAddress } from "../lib/stellar";
 import { StateBlock } from "./StateBlock";
+import { Card, CardHeader } from "./ui/Card";
 
 export function SolverLeaderboard() {
   const { error, leaderboard, loading } = useLeaderboard();
@@ -24,11 +25,11 @@ export function SolverLeaderboard() {
   }
 
   return (
-    <section className="rounded-md border border-zinc-800 bg-zinc-950">
-      <div className="flex items-center gap-2 border-b border-zinc-800 px-4 py-3 text-sm font-medium text-white">
+    <Card as="section">
+      <CardHeader className="flex items-center gap-2 text-sm font-medium text-white">
         <Trophy aria-hidden="true" size={17} className="text-emerald-400" />
         <span>Leaderboard</span>
-      </div>
+      </CardHeader>
       <div className="divide-y divide-zinc-800">
         {leaderboard.map((entry) => (
           <div key={entry.solver} className="flex items-center justify-between px-4 py-3">
@@ -37,7 +38,6 @@ export function SolverLeaderboard() {
           </div>
         ))}
       </div>
-    </section>
+    </Card>
   );
 }
-

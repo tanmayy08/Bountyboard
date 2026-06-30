@@ -1,9 +1,11 @@
 import { ShieldCheck } from "lucide-react";
 import type { ReputationData } from "../types";
+import { Card, CardContent } from "./ui/Card";
 
 export function ReputationBadge({ reputation }: { reputation: ReputationData | null }) {
   return (
-    <div className="rounded-md border border-zinc-800 bg-zinc-950 p-4">
+    <Card>
+      <CardContent>
       <div className="flex items-center gap-2 text-sm font-medium text-zinc-300">
         <ShieldCheck aria-hidden="true" size={17} className="text-emerald-400" />
         <span>Reputation</span>
@@ -21,7 +23,7 @@ export function ReputationBadge({ reputation }: { reputation: ReputationData | n
           <div className="font-medium text-white">{reputation?.disputed ?? 0}</div>
         </div>
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
-

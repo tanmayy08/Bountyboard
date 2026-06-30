@@ -14,7 +14,7 @@ export function PopoverContent({
         align="start"
         sideOffset={8}
         className={[
-          "z-50 rounded-md border border-zinc-800 bg-zinc-950 p-3 text-zinc-100 shadow-xl shadow-black/40 outline-none",
+          "z-50 rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-zinc-100 shadow-xl shadow-black/40 outline-none",
           className,
         ].join(" ")}
         {...props}

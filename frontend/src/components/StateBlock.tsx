@@ -1,4 +1,5 @@
 import { AlertCircle, Loader2 } from "lucide-react";
+import { Card } from "./ui/Card";
 
 interface StateBlockProps {
   title: string;
@@ -10,7 +11,10 @@ export function StateBlock({ title, message, type = "empty" }: StateBlockProps) 
   const Icon = type === "loading" ? Loader2 : AlertCircle;
 
   return (
-    <section className="flex min-h-52 flex-col items-center justify-center rounded-md border border-dashed border-zinc-800 bg-zinc-950/50 px-4 py-8 text-center">
+    <Card
+      as="section"
+      className="flex min-h-52 flex-col items-center justify-center border-dashed bg-zinc-950/50 px-4 py-8 text-center"
+    >
       <Icon
         aria-hidden="true"
         className={type === "loading" ? "animate-spin text-emerald-400" : "text-zinc-500"}
@@ -18,7 +22,6 @@ export function StateBlock({ title, message, type = "empty" }: StateBlockProps) 
       />
       <h2 className="mt-3 text-sm font-semibold text-white">{title}</h2>
       <p className="mt-1 max-w-md text-sm leading-6 text-zinc-400">{message}</p>
-    </section>
+    </Card>
   );
 }
-

@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { ClipboardList, Home, PlusCircle } from "lucide-react";
 import { WalletConnect } from "./WalletConnect";
+import { cn } from "../lib/utils";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -21,7 +22,7 @@ export function AppLayout() {
               Post it. Claim it. Get paid on-chain.
             </span>
           </NavLink>
-          <nav className="order-3 grid w-full grid-cols-3 gap-1 sm:order-none sm:flex sm:w-auto sm:items-center">
+          <nav className="order-3 grid w-full grid-cols-3 gap-1 rounded-full border border-zinc-800 bg-zinc-950/60 p-1 sm:order-none sm:flex sm:w-auto sm:items-center sm:border-0 sm:bg-transparent sm:p-0">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -29,12 +30,12 @@ export function AppLayout() {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    [
-                      "inline-flex h-10 items-center justify-center gap-2 rounded-md px-3 text-sm transition sm:justify-start",
+                    cn(
+                      "relative inline-flex h-9 items-center justify-center gap-2 rounded-full px-3 text-sm transition sm:justify-start",
                       isActive
-                        ? "bg-emerald-500 text-zinc-950"
-                        : "text-zinc-300 hover:bg-zinc-900 hover:text-white",
-                    ].join(" ")
+                        ? "text-emerald-300 after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:bg-emerald-400"
+                        : "text-zinc-400 hover:bg-zinc-900/70 hover:text-white sm:hover:bg-transparent",
+                    )
                   }
                 >
                   <Icon aria-hidden="true" size={17} />
